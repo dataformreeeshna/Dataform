@@ -38,18 +38,31 @@ WITH
       jd.CustomerID,
       jd.OrderID
     HAVING
-      SUM(jd.Quantity * jd.UnitPrice) >= 10000
-  ),
-
--- Step 3: Create a CTE to hold total_order_value
-  d AS (
-    SELECT total_order_value
-    FROM order_totals
+      total_order_value  >= 10000
   )
 
--- Select the final result
 SELECT
-  *,
-  (SELECT total_order_value FROM d) AS total_order_value
+  ot.CustomerID,
+  ot.OrderID,
+  ot.total_order_value,
+  (
+    SELECT DISTINCT
+      jd.ProductID
+    FROM
+      joined_data jd
+    WHERE
+      jd.CustomerID = ot.CustomerID
+      AND jd.OrderID = ot.OrderID
+  ) AS ProductID
 FROM
-  joined_data
+  order_totals ot
+  
+
+
+
+
+
+
+
+
+
