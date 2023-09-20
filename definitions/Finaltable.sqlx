@@ -31,10 +31,11 @@ order_totals AS (
     joined_data jd
   GROUP BY
     jd.Customerid,jd.OrderID
+    having total_order_value >= 10000
 )
 
 SELECT
-  OrderID,
+  Customerid,OrderID,
   total_order_value
 FROM
   order_totals
