@@ -1,4 +1,4 @@
-  config {
+config {
   type: "table",
 }
 
@@ -7,3 +7,4 @@ SELECT
   *
 FROM
   `sincere-passage-397504.gcs_bq_testingone.orders`
+  
