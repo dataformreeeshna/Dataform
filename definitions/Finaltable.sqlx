@@ -38,33 +38,18 @@ WITH
       jd.CustomerID,
       jd.OrderID
     HAVING
-      total_order_value >= 10000
+      SUM(jd.Quantity * jd.UnitPrice) >= 10000
   ),
 
--- Step 3: Calculate the average order value
-  avg_order_value AS (
-    SELECT
-      AVG(total_order_value) AS average_order_value
-    FROM
-      order_totals
-  ),
-
--- Step 4: Calculate the total number of orders per customer
-  total_orders_per_customer AS (
-    SELECT
-      CustomerID,
-      COUNT(DISTINCT OrderID) AS total_orders
-    FROM
-      (SELECT CustomerID, OrderID FROM joined_data) subquery
-    GROUP BY
-      CustomerID
+-- Step 3: Create a CTE to hold total_order_value
+  d AS (
+    SELECT total_order_value
+    FROM order_totals
   )
 
 -- Select the final result
 SELECT
   *,
-  (SELECT average_order_value FROM avg_order_value) AS avg_order_value
+  (SELECT total_order_value FROM d) AS total_order_value
 FROM
-  total_orders_per_customer
-
-
+  joined_data
