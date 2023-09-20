@@ -3,12 +3,39 @@ config {
   description: "This table calculates AVG from the source view",
   name: "Dataform_results"
 }
-select  
-t1.CustomerID,t2.OrderID,Sum(t3.Quantity * t3.Unitprice) as Total
-FROM ${ref("customer")} t1
-join ${ref("orders")} t2  
-on t1.CustomerID = t2.CustomerID
-join ${ref("order_details")} t3  
-on t2.OrderID = t3.OrderID
-group By t1.CustomerID,t2.OrderID
-having Total >= 10000
+
+WITH joined_data AS (
+  SELECT
+    t1.CustomerID,
+    t2.OrderID,
+    t3.UnitPrice,
+    t3.Quantity,
+    t3.ProductID
+  FROM
+    `sincere-passage-397504.gcs_bq_testingone.customer` t1
+  JOIN
+    `sincere-passage-397504.gcs_bq_testingone.orders` t2
+  ON
+    t1.CustomerID = t2.CustomerID
+  JOIN
+    `sincere-passage-397504.gcs_bq_testingone.order_details` t3
+  ON
+    t2.OrderID = t3.OrderID
+),
+
+order_totals AS (
+  SELECT
+    jd.Customerid,jd.OrderID,
+    SUM(jd.Quantity * jd.UnitPrice) AS total_order_value
+  FROM
+    joined_data jd
+  GROUP BY
+    jd.Customerid,jd.OrderID
+)
+
+SELECT
+  OrderID,
+  total_order_value
+FROM
+  order_totals
+
