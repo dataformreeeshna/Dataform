@@ -1,0 +1,14 @@
+config {
+  type: "table",
+  description: "This table calculates AVG from the source view",
+  name: "Dataform_results"
+}
+select  
+t1.Customerid,t2.OrderID,Sum(t3.Quantity * t3.Unitprice) as Total
+FROM ${ref("customer")} t1
+join ${ref("orders")} t2  
+on t1.Customerid = t2.Customerid 
+join ${ref("order_details")} t3  
+on t2.OrderID = t3.OrderID
+group By t1.Customerid,t2.Orderid
+having Total >= 10000
