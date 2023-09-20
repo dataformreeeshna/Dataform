@@ -1,42 +1,78 @@
+-- Define a dataset for the final transformed data
 config {
   type: "table",
   description: "This table calculates AVG from the source view",
   name: "Dataform_results"
 }
 
-WITH joined_data AS (
-  SELECT
-    t1.CustomerID,
-    t2.OrderID,
-    t3.UnitPrice,
-    t3.Quantity,
-    t3.ProductID
-  FROM
-    `sincere-passage-397504.gcs_bq_testingone.customer` t1
-  JOIN
-    `sincere-passage-397504.gcs_bq_testingone.orders` t2
-  ON
-    t1.CustomerID = t2.CustomerID
-  JOIN
-    `sincere-passage-397504.gcs_bq_testingone.order_details` t3
-  ON
-    t2.OrderID = t3.OrderID
-),
+-- Step 1: Join the three tables
+WITH
+  joined_data AS (
+    SELECT
+      t1.CustomerID,
+      t2.OrderID,
+      t3.UnitPrice,
+      t3.Quantity,
+      t3.ProductID
+    FROM
+      ${ref("customer")} AS t1
+    JOIN
+      ${ref("orders")} AS t2
+    ON
+      t1.CustomerID = t2.CustomerID
+    JOIN
+      ${ref("order_details")} AS t3
+    ON
+      t2.OrderID = t3.OrderID
+  ),
 
-order_totals AS (
-  SELECT
-    jd.Customerid,jd.OrderID,
-    SUM(jd.Quantity * jd.UnitPrice) AS total_order_value
-  FROM
-    joined_data jd
-  GROUP BY
-    jd.Customerid,jd.OrderID
-    having total_order_value >= 10000
-)
+-- Step 2: Calculate total order value for each order
+  order_totals AS (
+    SELECT
+      jd.CustomerID,
+      jd.OrderID,
+      SUM(jd.Quantity * jd.UnitPrice) AS total_order_value
+    FROM
+      joined_data jd
+    GROUP BY
+      jd.CustomerID,
+      jd.OrderID
+    HAVING
+      total_order_value >= 10000
+  ),
 
+-- Step 3: Calculate the average order value
+  avg_order_value AS (
+    SELECT
+      AVG(total_order_value) AS average_order_value
+    FROM
+      order_totals
+  ),
+
+-- Step 4: Calculate the total number of orders per customer
+  total_orders_per_customer AS (
+    SELECT
+      CustomerID,
+      COUNT(DISTINCT OrderID) AS total_orders
+    FROM
+      (SELECT CustomerID, OrderID FROM joined_data) subquery
+    GROUP BY
+      CustomerID
+  ),
+
+-- Step 5: Calculate the maximum order value
+  max_order_value AS (
+    SELECT
+      MAX(total_order_value) AS max_order_value
+    FROM
+      order_totals
+  )
+
+-- Select the final result
 SELECT
-  Customerid,OrderID,
-  total_order_value
+  *,
+  (SELECT average_order_value FROM avg_order_value) AS avg_order_value,
+  (SELECT max_order_value FROM max_order_value) AS max_order_value
 FROM
-  order_totals
+  total_orders_per_customer
 
