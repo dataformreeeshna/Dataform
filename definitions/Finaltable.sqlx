@@ -58,21 +58,13 @@ WITH
       (SELECT CustomerID, OrderID FROM joined_data) subquery
     GROUP BY
       CustomerID
-  ),
-
--- Step 5: Calculate the maximum order value
-  max_order_value AS (
-    SELECT
-      MAX(total_order_value) AS max_order_value
-    FROM
-      order_totals
   )
 
 -- Select the final result
 SELECT
   *,
-  (SELECT average_order_value FROM avg_order_value) AS avg_order_value,
-  (SELECT max_order_value FROM max_order_value) AS max_order_value
+  (SELECT average_order_value FROM avg_order_value) AS avg_order_value
 FROM
   total_orders_per_customer
+
 
