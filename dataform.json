@@ -1,5 +1,5 @@
 {
-  "defaultSchema": "dataform",
+  "defaultSchema": "gcs_bq_testingone",
   "assertionSchema": "dataform_assertions",
   "warehouse": "bigquery",
   "defaultDatabase": "sincere-passage-397504",

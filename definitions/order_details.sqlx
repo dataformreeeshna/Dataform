@@ -1,0 +1,4 @@
+SELECT
+  *
+FROM
+  `sincere-passage-397504.gcs_bq_testingone.order_details`
