@@ -1,0 +1,1 @@
+SELECT OrderID,RequiredDate,CAST(RequiredDate AS STRING ) as RequiredDate_as_string FROM `sincere-passage-397504`.spark_transformation_in_big_qery.orders

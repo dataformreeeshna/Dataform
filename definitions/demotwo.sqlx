@@ -1,0 +1,39 @@
+config {
+  type: "table",
+  name: "Multiple_Transformtion_in_sinile"
+}
+
+
+WITH customer_data AS
+      (
+        SELECT 
+          LOWER(CustomerID) as CustomerID,
+          UPPER(CompanyName) as CompanyName,
+          CONCAT(ContactName,' - ',ContactTitle) AS Name_Title
+        FROM
+          `sincere-passage-397504.spark_transformation_in_big_qery.customer`
+      ),
+      product_data AS
+      (
+        SELECT
+          ProductName,
+          CustomerID
+          SupplierID,
+          CONCAT(ProductName, '-', CAST(SupplierID AS STRING)) AS CombinedNameSupplier
+        FROM `sincere-passage-397504.spark_transformation_in_big_qery.products` 
+      ),
+      order_details_data As(
+        select OrderID,
+        Sum(Quantity * Unitprice) as Total
+        from `sincere-passage-397504.spark_transformation_in_big_qery.order_details`
+        group by OrderID
+
+      )
+      SELECT 
+       CustomerID,
+       Name_Title,
+       ProductName,
+       SupplierID,
+       OrderID,
+       Total
+       FROM customer_data,product_data,order_details_data

@@ -1,0 +1,49 @@
+CREATE OR REPLACE PROCEDURE  `sincere-passage-397504`.spark_transformation_in_big_qery.tempo_SP1()
+BEGIN
+CREATE TEMP TABLE sincere-passage-397504.spark_transformation_in_big_qery.my_temp_table 
+(
+  current_timetsamp TIMESTAMP,
+  current_date DATE,
+  CustomerID STRING,
+  total_freight FLOAT64,
+  total_amount FLOAT64,
+  max_amount FLOAT64,
+  min_amount FLOAT64,
+  avg_amount FLOAT64,
+  total_count INT64,
+  CompanyName STRING,
+  Name_Title STRING,
+  Country STRING,
+  Region STRING,
+  Phone STRING,
+  for_lit_function INT64
+);
+insert into sincere-passage-397504.spark_transformation_in_big_qery.my_temp_table(
+WITH OrderDetails AS (
+    SELECT LOWER(o.CustomerID) as CustomerID,SUM(o.Freight)as total_freight,SUM(od.UnitPrice * od.Quantity) as total_amount,
+    MAX(od.UnitPrice * od.Quantity) as max_amount,MIN(od.UnitPrice * od.Quantity) as min_amount,
+    AVG(od.UnitPrice * od.Quantity) as avg_amount,COUNT(*) as total_count
+    FROM `sincere-passage-397504`.spark_transformation_in_big_qery.orders o 
+    JOIN `sincere-passage-397504`.spark_transformation_in_big_qery.order_details od
+    ON o.OrderID = od.OrderID 
+    GROUP BY o.CustomerID
+),
+CustomerDetails AS (
+    SELECT DISTINCT LOWER(CustomerID) as CustomerID,UPPER(CompanyName) as CompanyName,
+    CONCAT(ContactName, ' - ', ContactTitle) as Name_Title,TRIM(REPLACE(SUBSTR(Phone, 2), ')', '-')) as     
+    Phone,Country,IFNULL(Region, 'not specified') as Region
+    FROM `sincere-passage-397504`.spark_transformation_in_big_qery.customer
+)
+SELECT  
+    CURRENT_TIMESTAMP() as current_timestamp, CURRENT_DATE() as current_date,c.CustomerID,ood.total_freight, ood.total_amount,
+    ood.max_amount,ood.min_amount,ood.avg_amount,ood.total_count,c.CompanyName,c.Name_Title,c.Country,
+    c.Region,c.Phone,CAST('1' as INT64) as for_lit_function 
+FROM OrderDetails ood
+LEFT JOIN CustomerDetails c ON ood.CustomerID = c.CustomerID
+WHERE c.Country NOT IN ('USA') 
+  AND c.Phone NOT LIKE '5%'
+ORDER BY c.CustomerID);
+END;
+
+
+call `sincere-passage-397504`.spark_transformation_in_big_qery.tempo_SP1()

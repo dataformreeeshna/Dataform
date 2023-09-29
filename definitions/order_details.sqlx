@@ -6,4 +6,4 @@ config {
 SELECT
   *
 FROM
-  `sincere-passage-397504.gcs_bq_testingone.order_details`
+  `sincere-passage-397504.spark_transformation_in_big_qery.order_details`

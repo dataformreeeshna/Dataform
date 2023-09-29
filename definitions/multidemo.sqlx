@@ -1,0 +1,29 @@
+config {
+  type: "table",
+  name: "sample_functi"
+}
+
+WITH customer_data AS
+(
+    SELECT 
+        LOWER(CustomerID) as CustomerID,
+        UPPER(CompanyName) as CompanyName,
+        CONCAT(ContactName,' - ',ContactTitle) AS Name_Title
+    FROM
+        `sincere-passage-397504.spark_transformation_in_big_qery.customer`
+),
+product_data AS
+(
+    SELECT
+        ProductName,
+        SupplierID,
+        CONCAT(ProductName, '-', CAST(SupplierID AS STRING)) AS CombinedNameSupplier
+    FROM `sincere-passage-397504.spark_transformation_in_big_qery.products`
+)
+SELECT 
+    CustomerID,
+    CompanyName,
+    Name_Title,
+    ProductName,
+    SupplierID
+FROM product_data,customer_data

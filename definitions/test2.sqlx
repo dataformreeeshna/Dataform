@@ -1,0 +1,6 @@
+
+
+
+
+
+SELECT table_name, ddl FROM `bigquery-public-data`.usa_names.INFORMATION_SCHEMA.TABLES WHERE table_name = 'usa_1910_current'

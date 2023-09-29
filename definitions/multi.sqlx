@@ -1,0 +1,23 @@
+config {
+  type: "table",
+  description: "This table calculates AVG from the source view",
+  name: "Dataform_multi"
+}
+
+WITH joined_data AS (
+  SELECT *
+  FROM `sincere-passage-397504.spark_transformation_in_big_qery.customer` t1
+),
+
+order_totals AS (
+  SELECT LOWER(CustomerID) as CustomerID
+  FROM joined_data
+),
+
+namee as (
+  select CompanyName from joined_data  
+)
+
+SELECT CustomerID,CompanyName
+FROM order_totals,namee
+
